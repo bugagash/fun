@@ -2,6 +2,9 @@
 #include <iostream>
 #define MAXLEN 1000
 
+bool check(char* str1, char* str2);
+int toi(char* str);
+
 class stack {
 public:
   stack() { //constructor
@@ -79,6 +82,19 @@ bool check(char* str1, char* str2) {
   return true;
 }
 
+int toi(char* str) {
+  int ans = 0;
+  int znak = 1;
+  int i = 0;
+  int e = 1;
+  if (str[i] == '-') { znak = -1; ++i; }
+  for (; str[i]; ++i) {
+    ans += static_cast<int>(str[i] - '0');
+    e *= 10;
+  }
+  return znak*ans;
+}
+
 int main() {
   char* buf = new char[MAXLEN];
   stack s;
@@ -92,7 +108,7 @@ int main() {
   while(!check(buf, exit)) {
     if (check(buf, top)) printf("%d\n", s.top());
     else if (check(buf, pop)) printf("%d\n", s.pop());
-    else if (check(buf, push)) s.push(static_cast<int>(buf[5] - '0'));
+    else if (check(buf, push)) s.push(toi(buf+5));
     else if (check(buf, size)) printf("%d\n", s.size());
     fgets(buf, MAXLEN, stdin);
   }
