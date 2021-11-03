@@ -108,7 +108,7 @@ int main() {
   while(!check(buf, exit)) {
     if (check(buf, top)) printf("%d\n", s.top());
     else if (check(buf, pop)) printf("%d\n", s.pop());
-    else if (check(buf, push)) s.push(toi(buf+5));
+    else if (check(buf, push)) s.push(atoi(buf+5));
     else if (check(buf, size)) printf("%d\n", s.size());
     fgets(buf, MAXLEN, stdin);
   }
