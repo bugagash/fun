@@ -103,12 +103,11 @@ int main() {
   printf("Hello!\nI can show you some triks\nCheck thsi out:\nCommands: push x; pop, top, size\n");
   fgets(buf, MAXLEN, stdin);
   while (!check_exit(buf)) {
-    if (check_pop(buf)) printf("%d\n", s.pop());
-    if (check_top(buf)) printf("%d\n", s.top());
-    if (check_push(buf)) printf("%d\n", buf[5]);
-    if (check_size(buf)) printf("%d\n", s.size());
-    delete[] buf;
-    fgets(buf, MAXLEN, stdin);
+    printf("%s\n", buf);
+    if (check_pop(buf)) { printf("%d\n", s.pop()); fgets(buf, MAXLEN, stdin); break; }
+    if (check_top(buf)) { printf("%d\n", s.top()); fgets(buf, MAXLEN, stdin); break; } 
+    if (check_push(buf)) { printf("%d\n", buf[5]); fgets(buf, MAXLEN, stdin); break; }
+    if (check_size(buf)) { printf("%d\n", s.size()); fgets(buf, MAXLEN, stdin); break; }
   }
   delete[] buf;
 }
