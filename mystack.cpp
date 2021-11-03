@@ -72,42 +72,30 @@ private:
   node* head;
 };
 
-bool check_size(char *str1) {
-  if (str1[0] != 's' && str1[1] != 'i' && str1[2] != 'z' && str1[3] != 'e') return false;
-  return true;
-}
-
-bool check_top(char *str) {
-  if (str[0] != 't' && str[1] != 'o' && str[3] != 'p') return false;
-  return true;
-}
-
-bool check_pop(char *str) {
-  if (str[0] != 'p' && str[1] != 'o' && str[2] != 'p') return false;
-  return true;
-}
-
-bool check_push(char *str) {
-  if (str[0] != 'p' && str[1] != 'u' && str[2] != 's' && str[3] != 'h') return false;
-  return true;
-}
-
-bool check_exit(char *str) {
-  if (str[0] != 'e' && str[1] != 'x' && str[2] != 'i' && str[3] != 't') return false;
+bool check(char* str1, char* str2) {
+  for (int i = 0; str1[i] && str2[i]; i++) {
+    if (str1[i] != str2[i]) return false;
+  }
   return true;
 }
 
 int main() {
   char* buf = new char[MAXLEN];
   stack s;
-  printf("Hello!\nI can show you some triks\nCheck thsi out:\nCommands: push x; pop, top, size\n");
+  char pop[4] = {'p', 'o', 'p', '\0'};
+  char top[4] = {'t', 'o', 'p', '\0'};
+  char size[5] = {'s', 'i', 'z', 'e', '\0'};
+  char exit[5] = {'e', 'x', 'i', 't', '\0'};
+  char push[5] = {'p', 'u', 's', 'h', '\0'};
+
   fgets(buf, MAXLEN, stdin);
-  while (!check_exit(buf)) {
-    printf("%s\n", buf);
-    if (check_pop(buf)) { printf("%d\n", s.pop()); fgets(buf, MAXLEN, stdin); break; }
-    if (check_top(buf)) { printf("%d\n", s.top()); fgets(buf, MAXLEN, stdin); break; } 
-    if (check_push(buf)) { printf("%d\n", buf[5]); fgets(buf, MAXLEN, stdin); break; }
-    if (check_size(buf)) { printf("%d\n", s.size()); fgets(buf, MAXLEN, stdin); break; }
+  while(!check(buf, exit)) {
+    if (check(buf, top)) printf("%d\n", s.top());
+    else if (check(buf, pop)) printf("%d\n", s.pop());
+    else if (check(buf, push)) s.push(static_cast<int>(buf[5] - '0'));
+    else if (check(buf, size)) printf("%d\n", s.size());
+    fgets(buf, MAXLEN, stdin);
   }
   delete[] buf;
+    
 }
