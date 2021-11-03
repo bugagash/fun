@@ -41,7 +41,7 @@ public:
 
   int pop() {
     node* tmp = head->prev;
-    /*if (tmp == nullptr) {
+    /*if (tmp == nullptr) {  //Don't make stupid requests!
       printf("Nothing to be pop\n");
       return -1;
     }*/ //For shitass!
