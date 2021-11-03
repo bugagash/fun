@@ -3,7 +3,6 @@
 #define MAXLEN 1000
 
 bool check(char* str1, char* str2);
-int toi(char* str);
 
 class stack {
 public:
@@ -42,6 +41,10 @@ public:
 
   int pop() {
     node* tmp = head->prev;
+    /*if (tmp == nullptr) {
+      printf("Nothing to be pop\n");
+      return -1;
+    }*/ //For shitass!
     head->prev = tmp->prev;
     int v = tmp->val;
     delete tmp;
@@ -80,19 +83,6 @@ bool check(char* str1, char* str2) {
     if (str1[i] != str2[i]) return false;
   }
   return true;
-}
-
-int toi(char* str) {
-  int ans = 0;
-  int znak = 1;
-  int i = 0;
-  int e = 1;
-  if (str[i] == '-') { znak = -1; ++i; }
-  for (; str[i]; ++i) {
-    ans += static_cast<int>(str[i] - '0');
-    e *= 10;
-  }
-  return znak*ans;
 }
 
 int main() {
