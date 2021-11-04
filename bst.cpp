@@ -40,10 +40,11 @@ private:
       if (this->right != nullptr) this->right->print(tab+1);
     }
 
-     void insert (int val) {
+      node  *insert (int val) {
       node *ptr = nullptr;
-      if (val > this->val) { right = (right == nullptr ? new node(val) : right->insert(val)); return; }
-      left = left == nullptr ? new node(val) : left->insert(val);
+      if (val > this->val) right = (right == nullptr ? new node(val) : right->insert(val));
+      else left = left == nullptr ? new node(val) : left->insert(val);
+      return this;
     }
 
     node *find(int val) {
