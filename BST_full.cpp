@@ -19,6 +19,12 @@ private:
 			if (!ptr) ptr = new BSNode(key);
 			else ptr->insert(key);
 		}
+
+		BSNode *find(T key) {
+			if (key > this->key) return right->find;
+			if (key < this->key) return left->find;
+			if (key == this->key) return *this;
+		}
 	};
 
 	BSNode *root = nullptr;
