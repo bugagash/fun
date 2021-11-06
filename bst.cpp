@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <iostream>
+#include <typeinfo>
 
 class bst {
 public:
@@ -25,9 +27,10 @@ private:
     }
 
     void insert(int _key) {
-      node *ptr = left;
-      if (ptr == nullptr) ptr = new node(_key);
-      else ptr->insert(_key);
+      node **ptr = (_key > key ? &right : &left);
+      std::cout << typeid(*ptr).name() << ' ' << typeid(this).name() << '\n';
+      if (*ptr == nullptr) { *ptr = new node(_key); std::cout << *ptr << " | " << left << '\n'; }
+      else { (*ptr)->insert(_key); std::cout << *ptr << ' ' << left << '\n'; }
       /*if (_key > key) {
         if (right == nullptr) right = new node(_key);
         else right->insert(_key);
