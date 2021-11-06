@@ -32,7 +32,7 @@ private:
 		void insert(T key) {
 			BSNode *ptr = key > this->key ? this->right : this->left;
 			if (!ptr) ptr = new BSNode(key);
-			else ptr->insert(key);
+			else ptr = ptr->insert(key);
 		}
 
 		BSNode *find(T key) {
