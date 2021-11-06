@@ -6,14 +6,14 @@ public:
 	BST() {root = nullptr;}
 	~BST() {}
 
-	void insert(T val) {
-		if (!root) root = new BSNode(val);
-		else root->insert(val);
+	void insert(T _key) {
+		if (!root) root = new BSNode(_key);
+		else root->insert(_key);
 	}
 
-	bool find(T key) {
-		BSNode *ptr = root->find(key);
-		if (!ptr) return false;
+	bool find(T _key) {
+		BSNode *ptr = root->find(_key);
+		if (ptr == nullptr) return false;
 		return true;
 	}
 
@@ -29,25 +29,26 @@ private:
 		BSNode(T val): key(val) {}
 		~BSNode() {}
 
-		void insert(T key) {
-			BSNode *ptr = key > this->key ? this->right : this->left;
-			if (!ptr) ptr = new BSNode(key);
-			else ptr = ptr->insert(key);
+		BSNode *insert(T _key) {
+			//BSNode *ptr = _key > this->key ? right : left;
+			//ptr == nullptr ? new BSNode(_key) : ptr->insert(_key);
+			if (_key > this->key) right == nullptr ? new BSNode(_key) : right->insert(_key);
+			else left == nullptr ? new BSNode(_key) : left->insert(_key);
+			return this;
 		}
 
-		BSNode *find(T key) {
-			if (key == this->key) return this;
-			BSNode *ptr = nullptr;
-			ptr = key > this->key ? this->right : this->left;
+		BSNode *find(T _key) {
+			if (_key == this->key) return this;
+			BSNode *ptr = _key > this->key ? this->right : this->left;
 			if (ptr == nullptr) return nullptr;
-			else return ptr->find(key);
+			else return ptr->find(_key);
 		}
 
-		void print(int tab) {
-			if (!right) right->print(tab + 1);
+		void print(int tab) const {
+			if (right) right->print(tab + 1);
 			for (int i = 0; i < tab; i++) printf(" ");
-			printf("%d\n", key);
-			if (!left) left->print(tab + 1);
+			printf("%d\n", this->key);
+			if (left) left->print(tab + 1);
 		}
 	};
 
@@ -60,6 +61,7 @@ int main() {
 	b.insert(3);
 	b.insert(31);
 	b.insert(1);
-	printf("%d\n", b.find(1));
+	printf("%d\n", b.find(3));
+	printf("_______________\n");
 	b.print();
 }
