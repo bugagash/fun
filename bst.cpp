@@ -7,7 +7,7 @@ public:
 
   void insert(int _key) {
     if (head == nullptr) head = new node(_key);
-    else head = head->insert(_key);
+    else head->insert(_key);
   }
 
   void print() {
@@ -24,16 +24,24 @@ private:
       right = nullptr;
     }
 
-    node *insert(int _key) {
-    node *cur = (_key > key ? right : left);
-    if (cur == nullptr) cur = new node(_key);
-    else cur = cur->insert(_key);
-    return this;
+    void insert(int _key) {
+      node *ptr = left;
+      if (ptr == nullptr) ptr = new node(_key);
+      else ptr->insert(_key);
+      /*if (_key > key) {
+        if (right == nullptr) right = new node(_key);
+        else right->insert(_key);
+      }
+      else {
+        if (left == nullptr) left = new node(_key);
+        else left->insert(_key);
+      }*/
+      //return this;
     }
 
     void print(int shift) {
       if (left != nullptr) left->print(shift+1);
-      for (int i = 0; i < shift; ++i) printf(" ");
+      for (int i = 0; i < shift; ++i) printf("  ");
       printf("%d\n", this->key);
       if (right != nullptr) right->print(shift+1);
     }
@@ -43,16 +51,12 @@ private:
 
 int main() {
   bst b1;
-  b1.insert(5);
-  b1.insert(4);
-  b1.insert(6);
-  b1.insert(3);
-  b1.insert(7);
+  b1.insert(14);
+  b1.insert(31);
   b1.insert(2);
   b1.insert(1);
-  b1.insert(8);
-  b1.insert(0);
-  b1.insert(9);
+  b1.insert(10);
+  b1.insert(3);
   /*for (int i = 0; i < 10; i++) {
     printf("%d -> %d\n", i, b1,find(i));
   }*/
