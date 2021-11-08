@@ -13,6 +13,13 @@ public:
 		memcpy(str, s.str, size);
 	}
 
+	void print() {
+		for (size_t i = 0; i < size; i++) {
+			std::cout << str[i];
+		}
+		std::cout << '\n';
+	}
+
 	void swap(String& s) {
 		std::swap(str, s.str);
 		std::swap(size, s.size);
@@ -30,21 +37,51 @@ public:
 		return *this;*/
 	}
 
+	String& operator+=(const String& s) {
+		String p = *this;
+		delete[] this->str;
+		str = new char[size + s.size];
+		memcpy(str, p.str, size);
+		memcpy(str + size, s.str, s.size);
+		size += s.size;
+		return *this;		
+	}
+
+	String& operator+=(const char& c) {
+		return *this += String(1, c);
+	}
+
+	char& operator[](size_t index) {
+		return str[index];
+	}
+
 	~String() {
 		delete[] str;
 	} 
+
 
 private:
 	char *str = nullptr;
 	size_t size = 0;
 };
 
+String operator+(const String&s1, const String& s2) {
+	String copy = s1;
+	return copy += s2;
+}
+
 int main() {
 	String *q = nullptr;
+	String s(10, 'a');
+	s.print();
+	s += 'b';
+	s.print();
+	std::cout << s[2] << '\n';
 	{
 		String p(11, 'p');
 		q = &p;
 	}
-	String s(10 ,'a');
+	//String s(10 ,'a');
+
 	std::cout << sizeof(s) << ' ' << sizeof(*q) << '\n';
 }
