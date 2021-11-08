@@ -37,6 +37,13 @@ public:
 		return *this;*/
 	}
 
+	String& operator=(const char* arr) {
+		if (str) {delete[] str; size = 0; }
+		for (size_t i = 0; arr[i]; ++i) size++;
+		memcpy(str, arr, size);
+		return *this;
+	}
+
 	String& operator+=(const String& s) {
 		String p = *this;
 		delete[] this->str;
@@ -65,17 +72,22 @@ private:
 	size_t size = 0;
 };
 
-String operator+(const String&s1, const String& s2) {
+String operator+(const String& s1, const String& s2) {
 	String copy = s1;
 	return copy += s2;
+}
+
+String operator+(const String& s1, const char& c) {
+	return s1 +  String(1, c);
 }
 
 int main() {
 	String *q = nullptr;
 	String s(10, 'a');
 	s.print();
-	s += 'b';
+	s += (String (11, '1') + 'b');
 	s.print();
+	//String p = "aaaaa";
 	std::cout << s[2] << '\n';
 	{
 		String p(11, 'p');
