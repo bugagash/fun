@@ -3,97 +3,92 @@
 
 class String {
 public:
-	String() = delete; //This isn't constructor
+	String() {
+		size = 0;
+		capacity = 16;
+		str = new char[16];
+	}
+
+	String(const char* cstr) {
+		capacity = 16;
+		size = 0;
+		for (size_t i = 0; cstr[i+1]; ++i) ++size;
+		for (; capacity < size; capacity *= 2);
+		str = new char[capacity];
+		memcpy(str, cstr, size);
+	}
 	
-	String(size_t n, char c): str(new char[n]), size(n) {
-		memset(str, c, n);
+	String(size_t n, char c) {
+		capacity = 16;
+		size = n;
+		for (; capacity < size; capacity *= 2);
+		str = new char[capacity];
+		memset(str, n, c);
 	}
 
-	String(const String& s): String(s.size, '\0') {
+	String(const String& s): size(s.size), capacity(s.capacity) {
+		str = new char[capacity];
 		memcpy(str, s.str, size);
-	}
-
-	void print() {
-		for (size_t i = 0; i < size; i++) {
-			std::cout << str[i];
-		}
-		std::cout << '\n';
-	}
-
-	void swap(String& s) {
-		std::swap(str, s.str);
-		std::swap(size, s.size);
-	}
-
-	//Copy and swap idiom
-	String& operator=(const String& s) {
-		String copy = s;
-		swap(copy);
-		return *this;
-		/*delete[] str;
-		str = new char[s.size];
-		size = s.size;
-		memcpy(str, s.str, size);
-		return *this;*/
-	}
-
-	String& operator=(const char* arr) {
-		if (str) {delete[] str; size = 0; }
-		for (size_t i = 0; arr[i]; ++i) size++;
-		memcpy(str, arr, size);
-		return *this;
-	}
-
-	String& operator+=(const String& s) {
-		String p = *this;
-		delete[] this->str;
-		str = new char[size + s.size];
-		memcpy(str, p.str, size);
-		memcpy(str + size, s.str, s.size);
-		size += s.size;
-		return *this;		
-	}
-
-	String& operator+=(const char& c) {
-		return *this += String(1, c);
-	}
-
-	char& operator[](size_t index) {
-		return str[index];
 	}
 
 	~String() {
 		delete[] str;
-	} 
+	}
 
+	size_t length() const {
+		return size;
+	}
+	
+	/*void swap_pointers(char* s1, char* s2) {
+		char* tmp = s1;
+		s1 = s2;
+		s2 = tmp;
+	}*/
+
+	void push_back(char c) {
+		++size;
+		if (size > capacity) {
+			capacity *= 2;
+			char *tmp = new char[capacity];
+			memcpy(tmp, str, size-1);
+			delete[] str;
+			str = tmp;
+		}
+		str[size] = c;
+	} //Amortized O(1)
+	
+	void pop_back() {} //Amortized O(1)
+	
+	char& front() {}
+	
+	char& back() {}
+	
+	size_t find(const String& substr) {}
+	
+	size_t rfind(const String& substr) {}
+	
+	String substr(size_t start, size_t count) {}
+	
+	bool empty() {}
+	
+	void clear() {}
+	
+	bool operator==(const String& str) {}
+	
+	char operator[](int index) {}
+	
+	String& operator+=(const String& str) {}
 
 private:
-	char *str = nullptr;
-	size_t size = 0;
+char* str = nullptr;
+size_t size, capacity;
+
 };
 
-String operator+(const String& s1, const String& s2) {
-	String copy = s1;
-	return copy += s2;
-}
+std::istream& operator>>(std::istream& input, const String& str) {}
 
-String operator+(const String& s1, const char& c) {
-	return s1 +  String(1, c);
-}
+std::ostream& operator<<(std::ostream& output, const String& str) {}
 
 int main() {
-	String *q = nullptr;
-	String s(10, 'a');
-	s.print();
-	s += (String (11, '1') + 'b');
-	s.print();
-	//String p = "aaaaa";
-	std::cout << s[2] << '\n';
-	{
-		String p(11, 'p');
-		q = &p;
-	}
-	//String s(10 ,'a');
 
-	std::cout << sizeof(s) << ' ' << sizeof(*q) << '\n';
 }
