@@ -10,15 +10,21 @@ public:
 	}
 
 	String(const char* cstr) {
+		if (str) {
+			delete[] str;
+		}
 		capacity = 16;
 		size = 0;
-		for (size_t i = 0; cstr[i+1]; ++i) ++size;
+		for (size_t i = 0; cstr[i]; ++i) ++size;
 		for (; capacity < size; capacity *= 2);
 		str = new char[capacity];
 		memcpy(str, cstr, size);
 	}
 	
 	String(size_t n, char c) {
+		if (str) {
+			delete[] str;
+		}
 		capacity = 16;
 		size = n;
 		for (; capacity < size; capacity *= 2);
@@ -27,6 +33,7 @@ public:
 	}
 
 	String(const String& s): size(s.size), capacity(s.capacity) {
+		if (str) delete[] str;
 		str = new char[capacity];
 		memcpy(str, s.str, size);
 	}
@@ -38,6 +45,10 @@ public:
 	size_t length() const {
 		return size;
 	}
+
+	size_t mem() const {
+		return capacity;
+	}
 	
 	/*void swap_pointers(char* s1, char* s2) {
 		char* tmp = s1;
@@ -46,15 +57,15 @@ public:
 	}*/
 
 	void push_back(char c) {
-		++size;
-		if (size > capacity) {
+		if (size + 1 > capacity) {
 			capacity *= 2;
 			char *tmp = new char[capacity];
-			memcpy(tmp, str, size-1);
+			memcpy(tmp, str, size);
 			delete[] str;
 			str = tmp;
 		}
 		str[size] = c;
+		++size;
 	} //Amortized O(1)
 	
 	void pop_back() {
@@ -69,18 +80,40 @@ public:
 	} //Amortized O(1)
 	
 	char& front() const {
-		return str[size-1];
-	}
-	
-	char& back() {
 		return str[0];
 	}
 	
-	size_t find(const String& substr) {}
+	char& back() {
+		return str[size-1];
+	}
 	
-	size_t rfind(const String& substr) {}
+	size_t find(const String& substr) {
+		size_t i = 0, j = 0;
+		for (i = 0; i < size; ++i) {
+			for (j = 0; j < substr.size && str[i+j] == substr.str[j]; ++j);
+			if (j == substr.size) return i; 
+		}
+		return size;
+	}
 	
-	String substr(size_t start, size_t count) {}
+	size_t rfind(const String& substr) {
+		size_t i = 0, j = 0;
+		size_t pos = -1;
+		for (i = 0; i < size; ++i) {
+			for (j = 0; j < substr.size && str[i+j] == substr.str[j]; ++j);
+			if (j == substr.size) pos = i; 
+		}
+		if (pos != -1) return pos;
+		return size;
+	}
+	
+	String substr(size_t start, size_t count) {
+		String tmp;
+		for (size_t i = 0; i < count && i + start < size; ++i) {
+			tmp.push_back(str[i + start]);
+		}
+		return tmp;
+	}
 	
 	bool empty() {
 		return size == 0;
@@ -88,21 +121,28 @@ public:
 	
 	void clear() {
 		size = 0;
+		capacity = 16;
+		delete[] str;
+		str = new char [capacity];
 	}
 	
 	bool operator==(const String& s) const {
 		size_t i = 0;
 		if (size != s.size) return false;
 		for (; i < size && str[i] == s.str[i]; ++i);
-		if (i != size-1) return false;
-		else return true;
+		if (i != size) return false;
+		return true;
 	}
 	
 	char operator[](const int index) const {
 		return str[index];
 	}
 	
-	String& operator+=(const String& str) {}
+	String& operator+=(const String& str) {
+	}
+
+	friend std::istream& operator>>(std::istream& input, const String& str);
+	friend std::ostream& operator<<(std::ostream& output, const String& str);
 
 private:
 char* str = nullptr;
@@ -110,10 +150,34 @@ size_t size, capacity;
 
 };
 
-std::istream& operator>>(std::istream& input, const String& str) {}
+std::istream& operator>>(std::istream& input, String& str) {
+	if (str.length() != 0) {
+		str.clear();
+	}
+	char c;
+	input.get(c);
+	while (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z')) && (c != ' ') && (c != '\n')) {
+		str.push_back(c);
+		input.get(c);
+	}
+	return input;
+}
 
-std::ostream& operator<<(std::ostream& output, const String& str) {}
+std::ostream& operator<<(std::ostream& output, const String& str) {
+	for (size_t i = 0; i < str.size; i++) {
+		output << str.str[i];
+	}
+	return output;
+}
 
 int main() {
-
+	String p = "moreradosti";
+	String c = p.substr(0,1);
+	std::cout << p.front() << ' ' << p.back() << '\n';
+	std::cout << c << '\n';
 }
+
+
+
+
+
