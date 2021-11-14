@@ -32,6 +32,16 @@ public:
 		memset(str, n, c);
 	}
 
+	String(const char c) {
+		if (str) {
+			delete[] str;
+		}
+		capacity = 1;
+		size = 1;
+		str = new char[1];
+		str[0] = c;
+	}
+
 	String(const String& s): size(s.size), capacity(s.capacity) {
 		if (str) delete[] str;
 		str = new char[capacity];
@@ -83,11 +93,11 @@ public:
 		return str[0];
 	}
 	
-	char& back() {
+	char& back() const {
 		return str[size-1];
 	}
 	
-	size_t find(const String& substr) {
+	size_t find(const String& substr) const {
 		size_t i = 0, j = 0;
 		for (i = 0; i < size; ++i) {
 			for (j = 0; j < substr.size && str[i+j] == substr.str[j]; ++j);
@@ -96,7 +106,7 @@ public:
 		return size;
 	}
 	
-	size_t rfind(const String& substr) {
+	size_t rfind(const String& substr) const {
 		size_t i = 0, j = 0;
 		size_t pos = -1;
 		for (i = 0; i < size; ++i) {
@@ -107,7 +117,7 @@ public:
 		return size;
 	}
 	
-	String substr(size_t start, size_t count) {
+	String substr(size_t start, size_t count) const {
 		String tmp;
 		for (size_t i = 0; i < count && i + start < size; ++i) {
 			tmp.push_back(str[i + start]);
@@ -138,7 +148,29 @@ public:
 		return str[index];
 	}
 	
-	String& operator+=(const String& str) {
+	/*String& operator+=(const String& s) {
+		size_t new_size = size + s.size;
+		for(; new_size > capacity; capacity *= 2);
+		char* tmp = new char[capacity];
+		memcpy(tmp, str, size);
+		memcpy(tmp+size, s.str, s.size);
+		delete[] str;
+		str = tmp;
+		size = new_size;
+		return *this;
+	}*/
+
+	String& operator+=(const String& s) {
+		for (size_t i = 0; i < s.size; i++) {
+			this->push_back(s[i]);
+		}
+		size += s.size;
+		return *this;
+	}
+
+	String& operator+=(const char c) {
+		this->push_back(c);
+		return *this;
 	}
 
 	friend std::istream& operator>>(std::istream& input, const String& str);
@@ -171,10 +203,13 @@ std::ostream& operator<<(std::ostream& output, const String& str) {
 }
 
 int main() {
-	String p = "moreradosti";
-	String c = p.substr(0,1);
-	std::cout << p.front() << ' ' << p.back() << '\n';
-	std::cout << c << '\n';
+	String p = "123456";
+	const String c = "89";
+	std::cout << p << '\n';
+	p += '7';
+	std::cout << p << '\n';
+	p += c;
+	std::cout << p << '\n';
 }
 
 
