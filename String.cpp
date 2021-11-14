@@ -57,11 +57,24 @@ public:
 		str[size] = c;
 	} //Amortized O(1)
 	
-	void pop_back() {} //Amortized O(1)
+	void pop_back() {
+		--size;
+		if (size < capacity/4) {
+			capacity /= 2;
+			char *tmp = new char[capacity];
+			memcpy(tmp, str, size);
+			delete[] str;
+			str = tmp;
+		}
+	} //Amortized O(1)
 	
-	char& front() {}
+	char& front() const {
+		return str[size-1];
+	}
 	
-	char& back() {}
+	char& back() {
+		return str[0];
+	}
 	
 	size_t find(const String& substr) {}
 	
@@ -69,13 +82,25 @@ public:
 	
 	String substr(size_t start, size_t count) {}
 	
-	bool empty() {}
+	bool empty() {
+		return size == 0;
+	}
 	
-	void clear() {}
+	void clear() {
+		size = 0;
+	}
 	
-	bool operator==(const String& str) {}
+	bool operator==(const String& s) const {
+		size_t i = 0;
+		if (size != s.size) return false;
+		for (; i < size && str[i] == s.str[i]; ++i);
+		if (i != size-1) return false;
+		else return true;
+	}
 	
-	char operator[](int index) {}
+	char operator[](const int index) const {
+		return str[index];
+	}
 	
 	String& operator+=(const String& str) {}
 
