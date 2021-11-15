@@ -227,12 +227,3 @@ String operator+(const String& s1, const String& s2) {
 	tmp += s2;
 	return tmp;
 }
-
-int main() {
-	String s = "abba";
-	String p = "abb";
-	String c = 'a';
-	s = s;
-	std::cout << s << '\n';
-}
-
