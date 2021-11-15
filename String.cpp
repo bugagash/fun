@@ -1,5 +1,6 @@
 #include <cstring>
 #include <iostream>
+//#include <time.h>
 
 class String {
 public:
@@ -9,16 +10,16 @@ public:
 		str = new char[16];
 	}
 
-	String(const char* cstr) {
+	String(const char* arr) {
 		if (str) {
 			delete[] str;
 		}
 		capacity = 16;
 		size = 0;
-		for (size_t i = 0; cstr[i]; ++i) ++size;
+		for (size_t i = 0; arr[i]; ++i) ++size;
 		for (; capacity < size; capacity *= 2);
 		str = new char[capacity];
-		memcpy(str, cstr, size);
+		memcpy(str, arr, size);
 	}
 	
 	String(size_t n, char c) {
@@ -159,6 +160,7 @@ public:
 		size = new_size;
 		return *this;
 	}*/
+	//Next realization is better:
 
 	String& operator+=(const String& s) {
 		for (size_t i = 0; i < s.size; i++) {
@@ -167,6 +169,23 @@ public:
 		size += s.size;
 		return *this;
 	}
+
+	String& operator=(const String& s) {
+		delete[] str;
+		size = s.size;
+		capacity = s.capacity;
+		str = new char[size];
+		memcpy(str, s.str, size);
+		return *this;
+	}
+
+	//Testing += for quest number:
+	//1.69146 -- first for 100000 1e5
+	//9.73115 -- second for 100000000 1e8
+
+	//Testing += for quest length:
+	//4.1e-05 -- first for 1e5
+	//0.01341 -- second for 1e5
 
 	String& operator+=(const char c) {
 		this->push_back(c);
@@ -202,17 +221,18 @@ std::ostream& operator<<(std::ostream& output, const String& str) {
 	return output;
 }
 
-int main() {
-	String p = "123456";
-	const String c = "89";
-	std::cout << p << '\n';
-	p += '7';
-	std::cout << p << '\n';
-	p += c;
-	std::cout << p << '\n';
+String operator+(const String& s1, const String& s2) {
+	String tmp;
+	tmp += s1;
+	tmp += s2;
+	return tmp;
 }
 
-
-
-
+int main() {
+	String s = "abba";
+	String p = "abb";
+	String c = 'a';
+	s = s;
+	std::cout << s << '\n';
+}
 
