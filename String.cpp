@@ -110,11 +110,15 @@ public:
 	size_t rfind(const String& substr) const {
 		size_t i = 0, j = 0;
 		size_t pos = -1;
+		bool check = 0;
 		for (i = 0; i < size; ++i) {
 			for (j = 0; j < substr.size && str[i+j] == substr.str[j]; ++j);
-			if (j == substr.size) pos = i; 
+			if (j == substr.size) {
+				pos = i;
+				check = 1;
+			} 
 		}
-		if (pos != -1) return pos;
+		if (check) return pos;
 		return size;
 	}
 	
@@ -145,7 +149,7 @@ public:
 		return true;
 	}
 	
-	char operator[](const int index) const {
+	char& operator[](const int index) {
 		return str[index];
 	}
 	
@@ -164,7 +168,7 @@ public:
 
 	String& operator+=(const String& s) {
 		for (size_t i = 0; i < s.size; i++) {
-			this->push_back(s[i]);
+			this->push_back(s.str[i]);
 		}
 		size += s.size;
 		return *this;
@@ -207,7 +211,7 @@ std::istream& operator>>(std::istream& input, String& str) {
 	}
 	char c;
 	input.get(c);
-	while (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z')) && (c != ' ') && (c != '\n')) {
+	while ((((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) && (c != ' ') && (c != '\n')) {
 		str.push_back(c);
 		input.get(c);
 	}
