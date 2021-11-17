@@ -27,7 +27,11 @@ private:
 		BSNode *left = nullptr;
 		BSNode *right = nullptr;
 		BSNode(T val): key(val) {}
-		~BSNode() {}
+		
+		~BSNode() {
+			if (left) delete[] left;
+			if (right) delete[] right;
+		}
 
 		BSNode *insert(T _key) {
 			//BSNode *ptr = _key > this->key ? right : left;
