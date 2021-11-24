@@ -22,7 +22,7 @@ static void _reverse(char* str, size_t size) {
 	}
 }
 
-static void _inc_size(bn* r) {
+static void _inc_size(bn* r) { //incremet size
 	r->size += 1;
 	if (r->size == r->capacity) {
 		r->capacity <<= 1;
@@ -31,19 +31,40 @@ static void _inc_size(bn* r) {
 	}
 }
 
-static void _check_is_zero(bn* t) {
+static void _check_is_zero(bn* t) { //Making zeros of non-zeros bn
 	if (t->size != 0 && t->body != NULL) {
-		memset(t->body, 0, sizeof(uint32_t) * t->size);
+		memset(t->body, 0, sizeof(uint32_t) * t->capacity);
 		t->size = 0;
 		t->sign = 1;
 	}
 }
 
-static void _check_capacity(bn* t) {
+static int _check_capacity(bn* t) { //Checking if we have more than we really need
 	if (t->size <= t->capacity >> 2) {
 		t->capacity >>= 1;
 		t->body = (uint32_t *)realloc(t->body, sizeof(uint32_t) * t->capacity);
+		if (t->body == NULL) return BN_NO_MEMORY;
 	}
+	return BN_OK;
+}
+
+static int _set_size(bn* left, bn* const right) { //Set left size equals to right
+	if (left->capacity < right->capacity) {
+		left->capacity = right->capacity;
+		left->body = (uint32_t *)realloc(left->body, left->capacity * sizeof(uint32_t));
+		if (left->body == NULL) return BN_NO_MEMORY;
+		memset(left->body + left->size, 0, (left->capacity - left->size) * sizeof(uint32_t));
+	}
+	if (right->capacity < left->capacity) {
+		right->capacity = left->capacity;
+		right->body = (uint32_t *)realloc(right->body, right->capacity * sizeof(uint32_t));
+		if (right->body == NULL) return BN_NO_MEMORY;
+		memset(right->body + right->size, 0, (right->capacity - right->size) * sizeof(uint32_t));
+	}
+	if (left->size < right->size) {
+		left->size = right->size;
+	}
+	return BN_OK;
 }
 
 extern bn *bn_new() {
@@ -79,6 +100,7 @@ extern bn *bn_init(const bn* const orig) {
 extern int bn_init_string(bn* t, const char* init_string) {
 	if (t == NULL) return BN_NULL_OBJECT;
 	if (t->body == NULL) return BN_NO_MEMORY;
+	_check_is_zero(t);
 	const size_t BUFFSIZE = 9;
 	char chunk[BUFFSIZE + 1];
 	memset(chunk, 0, (BUFFSIZE + 1) * sizeof(char));
@@ -88,9 +110,10 @@ extern int bn_init_string(bn* t, const char* init_string) {
 		chunk[index++] = init_string[i];
 		if (index == BUFFSIZE) {
 			_reverse(chunk, BUFFSIZE);
-			chunk[index+1] = '\0';
+			//chunk[index+1] = '\0';
 			t->body[cur++] = atoi(chunk);
 			_inc_size(t);
+			index = 0;
 		}
 	}
 	if (init_string[0] == '-') {
@@ -115,7 +138,15 @@ extern int bn_init_string_radix(bn* t, const char* init_string, int radix) {
 
 extern int bn_init_int(bn* t, int init_int) {
 	if (t == NULL) return BN_NULL_OBJECT;
-
+	if (t->body == NULL) return BN_NO_MEMORY;
+	_check_is_zero(t);
+	if (init_int < 0) {
+		t->sign = -1;
+		init_int = -init_int;
+	}
+	t->body[0] = init_int;
+	_inc_size(t);
+	return BN_OK;
 }
 
 extern int bn_delete(bn* t) {
@@ -133,26 +164,42 @@ extern int bn_delete(bn* t) {
 
 // +=
 extern int bn_add_to(bn* t, bn* const right) {
-
+	if (t == NULL || right == NULL) return BN_NULL_OBJECT;
+	if (t->body == NULL || right->body == NULL) return BN_NO_MEMORY;
+	if (_set_size(t, right) != BN_OK) {
+		return BN_NO_MEMORY;
+	}
+	uint8_t F = 0;
+	for (size_t i = 0; i < t->size; ++i) {
+		uint64_t tmp = t->body[i] + right->body[i] + F;
+		t->body[i] = tmp % 1000000000;
+		F = tmp / 1000000000;
+	}
+	if (F) {
+		t->body[t->size] = F;
+		_inc_size(t);
+	}
+	_check_capacity(t);
+	return BN_OK;
 }
 
 // -=
-extern int bn_sub_to(bn *t, bn const *right) {
+extern int bn_sub_to(bn *t, bn* const right) {
 
 }
 
 // *=
-extern int bn_mul_to(bn *t, bn const *right) {
+extern int bn_mul_to(bn *t, bn* const right) {
 
 }
 
 // /=
-extern int bn_div_to(bn *t, bn const *right) {
+extern int bn_div_to(bn *t, bn* const right) {
 
 }
 
 // %=
-extern int bn_mod_to(bn *t, bn const *right) {
+extern int bn_mod_to(bn *t, bn* const right) {
 
 }
 
@@ -173,7 +220,10 @@ extern bn* bn_add(bn* const left, bn* const right) {
 
 // = l - r
 extern bn* bn_sub(bn* const left, bn* const right) {
-
+	if (left == NULL || right == NULL) return NULL;
+	if (left->body == NULL || right->body == NULL) return NULL;
+	bn* t = bn_new();
+	return t;
 }
 
 // = l * r
@@ -188,17 +238,18 @@ extern bn* bn_div(bn* const left, bn* const right) {
 
 // = l % r
 extern bn* bn_mod(bn* const left, bn* const right) {
-
+	
 }
 
 // Выдать представление BN в системе счисления radix в виде строки
 // Строку после использования потребуется удалить.
-const char *bn_to_string(bn const *t, int radix) {
+const char *bn_to_string(const bn* const t, int radix) {
 
 }
 
 // Если левое меньше, вернуть <0; если равны, вернуть 0; иначе  >0
 int bn_cmp(const bn* const left, const bn* const right) {
+
 }
 
 // Изменить знак на противоположный
@@ -224,15 +275,44 @@ int bn_sign(bn const *t) {
 	return -1;
 }
 
+extern void print_bn(const bn* const t) {
+	if (t->size == 0) {
+		printf("null_object\n");
+		return;
+	}
+	if (t->sign == -1) printf("-");
+	ssize_t i = t->size - 1;
+	for (; i > 0; --i) {
+		if (t->body[i] != 0) break;
+	}
+	printf("%u", t->body[i]);
+	for (--i; i != -1; --i) {
+		printf("%.9u", t->body[i]);
+	}
+	putchar('\n');
+}
+
 int main() {
 	bn *x = bn_new();
 	bn *y = bn_new();
+	bn* z = bn_new();
 
 	printf("I am on line 230\n");
 
-	bn_init_string(x, "9999999999999999999999999");
-	bn_init_string(y, "1");
+	bn_init_string(x, "99999999999999999999999999");
+	bn_init_string(y, "2");
+	bn_init_int(z, 1234567890);
+	print_bn(x);
+	print_bn(y);
+	print_bn(z);
+	printf("x cap - %zu x size - %zu\n", x->capacity, x->size);
+	printf("y cap - %zu y size - %zu\n", y->capacity, y->size);
+	printf("%d\n", bn_add_to(x, y));
+	print_bn(x);
+	printf("x cap - %zu x size - %zu\n", x->capacity, x->size);
+	printf("y cap - %zu y size - %zu\n", y->capacity, y->size);
 	printf("I HAVE A PROBLEM!\n");
 	bn_delete(x);
 	bn_delete(y);
+	bn_delete(z);
 }
