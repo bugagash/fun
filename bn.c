@@ -13,6 +13,26 @@ struct bn_s {
 	int8_t sign;
 };
 
+extern bn *bn_new();
+extern bn *bn_init(const bn* const orig);
+extern int init_string(bn* t, const char* init_string);
+extern int bn_init_string_radix(bn* t, const char* init_string, int radix);
+extern int bn_init_int(bn* t, int init_int);
+extern int bn_delete(bn* t);
+extern int bn_add_to(bn* t, bn* const right);
+extern int bn_sub_to(bn* t, bn* const right);
+extern int bn_neg(bn* t);
+
+static int _check_bn_NULL(const bn* x, const bn* y) {
+	if (x == NULL || y == NULL) return 1;
+	return 0;
+}
+
+static int _check_body_NULL(const bn* x, const bn* y) {
+	if (x->body == NULL || y->body == NULL) return 1;
+	return 0;
+}
+
 static void _reverse(char* str, size_t size) {
 	uint8_t tmp;
 	for (size_t i = 0, j = size-1; i < size / 2; ++i, --j) {
@@ -93,7 +113,7 @@ extern bn *bn_init(const bn* const orig) {
 		free(r);
 		return NULL;
 	}
-	memcpy(r->body, orig->body, r->size);
+	memcpy(r->body, orig->body, r->size * sizeof(uint32_t));
 	return r;
 }
 
@@ -106,6 +126,9 @@ extern int bn_init_string(bn* t, const char* init_string) {
 	memset(chunk, 0, (BUFFSIZE + 1) * sizeof(char));
 	size_t length = strlen(init_string);
 	size_t index = 0, cur = 0;
+	if (length == 0) {
+		return BN_OK;
+	}
 	for (size_t i = length - 1; i != 0; --i) {
 		chunk[index++] = init_string[i];
 		if (index == BUFFSIZE) {
@@ -164,8 +187,14 @@ extern int bn_delete(bn* t) {
 
 // +=
 extern int bn_add_to(bn* t, bn* const right) {
-	if (t == NULL || right == NULL) return BN_NULL_OBJECT;
-	if (t->body == NULL || right->body == NULL) return BN_NO_MEMORY;
+	if (_check_bn_NULL(t, right)) return BN_NULL_OBJECT;
+	if (_check_body_NULL(t, right)) return BN_NO_MEMORY;
+	if (t->sign != right->sign) {
+		bn_neg(right);
+		int ERROR = bn_sub_to(t, right);
+		bn_neg(right);
+		return ERROR;
+	}
 	if (_set_size(t, right) != BN_OK) {
 		return BN_NO_MEMORY;
 	}
@@ -185,7 +214,22 @@ extern int bn_add_to(bn* t, bn* const right) {
 
 // -=
 extern int bn_sub_to(bn *t, bn* const right) {
-
+	if (_check_bn_NULL(t, right)) return BN_NULL_OBJECT;
+	if (_check_body_NULL(t, right)) return BN_NO_MEMORY;
+	if (t->sign != right->sign) {
+		bn_neg(right);
+		int ERROR = bn_add_to(t, right);
+		bn_neg(right);
+		return ERROR;
+	}
+	uint8_t F = 0;
+	//if (_set_size(t, right) != BN_OK) return BN_NO_MEMORY;
+	for (ssize_t i = 0; i < t->size; ++i) {
+		uint64_t tmp = (t->body[i] + 1000000000) - (right->body[i] + F);
+		t->body[i] = tmp % 1000000000;
+		F = (tmp >= 1000000000) ? 0 : 1;
+	}
+	return BN_OK;
 }
 
 // *=
@@ -248,19 +292,29 @@ const char *bn_to_string(const bn* const t, int radix) {
 }
 
 // Если левое меньше, вернуть <0; если равны, вернуть 0; иначе  >0
-int bn_cmp(const bn* const left, const bn* const right) {
-
+extern int bn_cmp(const bn* const left, const bn* const right) {
+	if (_check_bn_NULL(left, right)) return BN_NULL_OBJECT;
+	if (_check_body_NULL(left, right)) return BN_NO_MEMORY;
+	if (left->sign == right->sign) {
+		if (left->size != right->size) return (left->size > right->size) ? 10 : -10;
+		for (ssize_t i = left->size - 1; i != -1; --i) {
+			if (left->body[i] < right->body[i]) return -10;
+			if (left->body[i] > right->body[i]) return 10;
+		}
+	}
+	else return (left->sign > right->sign) ? 10 : -10;
+	return 0;
 }
 
 // Изменить знак на противоположный
-int bn_neg(bn *t) {
+extern int bn_neg(bn *t) {
 	if (t == NULL) return BN_NULL_OBJECT;
 	t->sign = -t->sign;
 	return BN_OK;
 }
 
 // Взять модуль
-int bn_abs(bn *t) {
+extern int bn_abs(bn *t) {
 	if (t == NULL) return BN_NULL_OBJECT;
 	if (t->sign == 1) return BN_OK;
 	t->sign = 1;
@@ -268,7 +322,7 @@ int bn_abs(bn *t) {
 }
 
 //-1 если t<0; 0 если t = 0, 1 если t>0
-int bn_sign(bn const *t) {
+extern int bn_sign(bn const *t) {
 	if (t == NULL) return BN_NULL_OBJECT;
 	if (t->sign == -1) return -1;
 	if (t->sign == 1) return 1;
@@ -293,25 +347,24 @@ extern void print_bn(const bn* const t) {
 }
 
 int main() {
-	bn *x = bn_new();
-	bn *y = bn_new();
-	bn* z = bn_new();
+	bn* x = bn_new();
+	bn* y = bn_new();
+	bn_init_string(x, "9999999999999999999999");
+	bn_init_string(y, "1");
+	bn* z = bn_init(y);
 
-	printf("I am on line 230\n");
-
-	bn_init_string(x, "99999999999999999999999999");
-	bn_init_string(y, "2");
-	bn_init_int(z, 1234567890);
 	print_bn(x);
 	print_bn(y);
 	print_bn(z);
-	printf("x cap - %zu x size - %zu\n", x->capacity, x->size);
-	printf("y cap - %zu y size - %zu\n", y->capacity, y->size);
-	printf("%d\n", bn_add_to(x, y));
+	printf("______________________\n");
+
+	bn_add_to(x, y);
+
 	print_bn(x);
-	printf("x cap - %zu x size - %zu\n", x->capacity, x->size);
-	printf("y cap - %zu y size - %zu\n", y->capacity, y->size);
-	printf("I HAVE A PROBLEM!\n");
+	print_bn(y);
+	print_bn(z);
+
+
 	bn_delete(x);
 	bn_delete(y);
 	bn_delete(z);
