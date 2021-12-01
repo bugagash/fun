@@ -228,4 +228,4 @@ String operator+(const String& s1, const String& s2) {
 	String tmp = s1;
 	tmp += s2;
 	return tmp;
-}ы
+}
