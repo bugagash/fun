@@ -210,6 +210,12 @@ public:
 		return *this;
 	}
 
+	BigInteger operator+(const BigInteger& bi1) const {
+		BigInteger copy = *this;
+		copy += bi1;
+		return copy;
+	}
+
 	BigInteger operator*(const BigInteger& bi1) const {
 		BigInteger copy = *this;
 		copy *= bi1;
@@ -222,12 +228,6 @@ public:
 		*this = ans;
 		return *this;
 		
-	}
-
-	BigInteger operator+(const BigInteger& bi1) const {
-		BigInteger copy = *this;
-		copy += bi1;
-		return copy;
 	}
 
 	BigInteger operator-(const BigInteger& bi1) const {
@@ -244,7 +244,7 @@ private:
 	std::vector<uint32_t> body;
 	uint32_t size;
 	int8_t sign;
-	uint32_t RADIX = 1000000000;
+	static const uint32_t RADIX = 1000000000;
 };
 
 void _reverse(char* buf, const int size) {
